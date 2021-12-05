@@ -1,9 +1,8 @@
+import ast
 import logging
-
-import flask
-from src.lib import crud, helpers
 from json import dumps
 from flask import Flask, request
+from src.lib import crud, helpers
 
 app = Flask(__name__)
 logging.basicConfig(
@@ -20,19 +19,20 @@ def home():
 @app.route("/search", methods=["GET"])
 def search_doc():
     try:
-        args = request.args.to_dict()
-        locations = args.get("locations")
-        radius = args.get("radius")
+        args = request.args.to_dict(flat=False)
+        locations = args.get("locations")[0]
+        locations = ast.literal_eval(locations)
+        radius = int(args.get("radius")[0])
         es = crud.connect_es()
         all_locations = helpers.capture_es_response(
-            crud.search_docs(es, "cities", {"query": {"match_all": {}}})
+            crud.search_docs(es, "candidates", {"query": {"match_all": {}}})
         )
-        response = helpers.capture_es_response(
-            crud.search_docs(
-                es, "cities", {"query": {"bool": {"must": [{"terms": {"city": locations}}]}}}
-            )
+        cities_response = helpers.capture_es_response(
+            crud.search_docs(es, "cities", {"query": {"terms": {"city": locations}}})
         )
-        response_lat_lon = helpers.capture_lat_lon(all_locations, response, radius)
+        response_lat_lon = helpers.capture_lat_lon(
+            all_locations, cities_response, radius
+        )
         found_ids = helpers.capture_ids(es, response_lat_lon)
         return dumps(found_ids), 200
     except Exception as error:

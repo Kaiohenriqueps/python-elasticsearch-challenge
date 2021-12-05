@@ -42,4 +42,4 @@ def capture_ids(es, lat_lon):
             data.get("_source").get("candidate_id")
             for data in es_response.get("hits").get("hits")
         ]
-    return {"ids": response}
+    return {"candidate_ids": response}

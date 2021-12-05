@@ -7,7 +7,6 @@ from flask import Flask, request
 
 app = Flask(__name__)
 logging.basicConfig(
-    filename="record.log",
     level=logging.DEBUG,
     format=f"%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s",
 )
@@ -20,16 +19,24 @@ def home():
 
 @app.route("/search", methods=["GET"])
 def search_doc():
-    app.logger.info("Info level log")
-    app.logger.warning("Warning level log")
     try:
-        # es = crud.connect_es()
-        locations = request.args.get("locations")
-        radius = request.args.get("radius")
-        return request.args, 200
+        args = request.args.to_dict()
+        locations = args.get("locations")
+        radius = args.get("radius")
+        es = crud.connect_es()
+        all_locations = helpers.capture_es_response(
+            crud.search_docs(es, "cities", {"query": {"match_all": {}}})
+        )
+        response = helpers.capture_es_response(
+            crud.search_docs(
+                es, "cities", {"query": {"bool": {"must": [{"terms": {"city": locations}}]}}}
+            )
+        )
+        response_lat_lon = helpers.capture_lat_lon(all_locations, response, radius)
+        found_ids = helpers.capture_ids(es, response_lat_lon)
+        return dumps(found_ids), 200
     except Exception as error:
         error_message = "{}:{}".format(error.__class__.__name__, str(error))
-        flask_logger.error(error_message)
         return error_message, 422
 
 

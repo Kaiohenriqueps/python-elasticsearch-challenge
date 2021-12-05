@@ -6,17 +6,17 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ".:/app"
-  # elasticsearch:
-  #   image: elasticsearch:7.5.1
-  #   ports:
-  #     - "9200:9200"
-  #     - "9300:9300"
-  #   environment:
-  #     - discovery.type=single-node
-  # kibana:
-  #   image: kibana:7.5.1
-  #   ports:
-  #     - "5601:5601"
-  #   environment:
-  #     - discovery.type=single-node
+      - .:/my_app
+  elasticsearch:
+    image: elasticsearch:7.5.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+  kibana:
+    image: kibana:7.5.1
+    ports:
+      - "5601:5601"
+    environment:
+      - discovery.type=single-node

@@ -27,12 +27,15 @@ def search_doc():
         all_candidates = helpers.capture_es_response(
             crud.search_docs(es, "candidates", {"query": {"match_all": {}}})
         )
+        app.logger.info(f"LOCATIONS: {locations}")
         cities_response = helpers.capture_es_response(
             crud.search_docs(es, "cities", {"query": {"terms": {"city": locations}}})
         )
+        app.logger.info(f"CITIES RESPONSE: {cities_response}")
         response_lat_lon = helpers.capture_lat_lon(
             all_candidates, cities_response, radius
         )
+        app.logger.info(f"RESPONSE: {response_lat_lon}")
         found_ids = helpers.capture_ids(es, response_lat_lon)
         return dumps(found_ids), 200
     except Exception as error:

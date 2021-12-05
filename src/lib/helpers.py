@@ -4,8 +4,8 @@ from haversine import Unit
 
 
 def haversine(lon1, lat1, lon2, lat2, radius):
-    loc1 = (lat1, lon1)
-    loc2 = (lat2, lon2)
+    loc1 = (float(lat1), float(lon1))
+    loc2 = (float(lat2), float(lon2))
     response = hs.haversine(loc1, loc2, unit=Unit.MILES)
     return True if response <= radius else False
 
@@ -39,7 +39,7 @@ def capture_ids(es, lat_lon):
             },
         )
         response += [
-            data.get("_source").get("candidate_id")
+            int(data.get("_source").get("candidate_id"))
             for data in es_response.get("hits").get("hits")
         ]
     return {"candidate_ids": response}

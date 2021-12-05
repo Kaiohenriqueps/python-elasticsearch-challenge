@@ -1,0 +1,25 @@
+version: '3'
+services:
+  elasticsearch:
+    image: elasticsearch:7.5.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+  kibana:
+    image: kibana:7.5.1
+    ports:
+      - "5601:5601"
+    environment:
+      - discovery.type=single-node
+  web_tests:
+    build: ./Dockerfiles/flask
+    ports:
+      - "5000:80"
+    volumes:
+      - .:/var/apache_flask
+    environment:
+      FLASK_APP: 'src/app.py'
+      FLASK_ENV: 'development'
+    command: "flask run -h '0.0.0.0' -p 80"

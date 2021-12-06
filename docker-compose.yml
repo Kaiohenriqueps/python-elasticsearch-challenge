@@ -8,7 +8,9 @@ services:
     volumes:
       - .:/my_app
     depends_on:
-      - elasticsearch
+      - "elasticsearch"
+    command: >
+      bash -c "./wait-elastic.sh && python3 load_data.py && python3 app.py"
   elasticsearch:
     image: elasticsearch:7.5.1
     ports:
